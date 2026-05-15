@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - Test_Changes
   schedule:
     - cron: "0 4 * * *"
 jobs:
@@ -10,31 +11,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
-      - name: Get Python 3.8
-        uses: actions/setup-python@v2
+      - name: Get Python 3.10
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.10'
       - name: Configure pip cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/cache/requirements.txt') }}
           restore-keys: ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: python -m pip install -r cache/requirements.txt
+
       - name: Update README file
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           USER_NAME: ${{ secrets.USER_NAME }}
         run: python today.py
-      - name: Commit
+
+      - name: Commit and Push
         run: |-
+          git config --global user.email "github-actions-bot@github.com"
+          git config --global user.name "github-actions-bot"
           git add .
-          git diff
-          git config --global user.email "github-actions-bot@andrew6rant.github.io"
-          git config --global user.name "Andrew6rant/GitHub-Actions-Bot"
-          git commit -m "Updated README" -a || echo "No changes to commit"
-          git push
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Updated README with personal stats" && git push)
