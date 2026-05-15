@@ -1,4 +1,5 @@
 name: README build
+
 on:
   push:
     branches:
@@ -6,6 +7,11 @@ on:
       - Test_Changes
   schedule:
     - cron: "0 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,10 +20,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
+
       - name: Get Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Configure pip cache
         uses: actions/cache@v3
         with:
@@ -39,4 +47,4 @@ jobs:
           git config --global user.email "github-actions-bot@github.com"
           git config --global user.name "github-actions-bot"
           git add .
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Updated README with personal stats" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Updated README with personal stats" && git push origin Test_Changes)
